@@ -1,0 +1,11 @@
+{
+  "name": "WebApp",
+  "version": "1.0.6",
+  "description": "Web application with intentional crash",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
