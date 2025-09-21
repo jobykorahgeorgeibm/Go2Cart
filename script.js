@@ -28,6 +28,7 @@ function updateCartCount() {
 
 // Load cart from localStorage
 function loadCart() {
+    console.log("loadCart() called");
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
         try {
@@ -118,8 +119,10 @@ function removeFromCart(productId) {
         saveCart();
         
         // If on cart page, update the UI
-        if (window.location.pathname.includes('cart.html')) {
+        if (window.location.pathname.includes('cart')) {
             renderCartPage();
+        }else{
+            console.log("else part of `window.location.pathname.includes('cart')` ");
         }
     } else {
         console.error(`Item with ID ${productId} not found in cart`);
@@ -139,8 +142,10 @@ function updateQuantity(productId, quantity) {
         saveCart();
         
         // If on cart page, update the UI
-        if (window.location.pathname.includes('cart.html')) {
+        if (window.location.pathname.includes('cart')) {
             renderCartPage();
+        }else{
+            console.log("else part of `window.location.pathname.includes('cart')`2 ");
         }
     }
 }
@@ -383,6 +388,7 @@ async function initProductsPage() {
 
 // Render cart page
 function renderCartPage() {
+    console.log("Render cart page!")
     const emptyCartElement = document.getElementById('empty-cart');
     const cartContentElement = document.getElementById('cart-content');
     const cartItemsElement = document.getElementById('cart-items');
@@ -455,6 +461,7 @@ function renderCartPage() {
 
 // Initialize cart page
 function initCartPage() {
+    console.log("Render cart page calle first")
     // Force authentication check
     if (!checkAuth()) {
         console.log("User not authenticated, redirecting to login page");
@@ -466,6 +473,7 @@ function initCartPage() {
     loadCart();
     console.log("Cart items before rendering:", cartItems);
     renderCartPage();
+    console.log("Render cart page called")
 }
 
 // Initialize checkout page
