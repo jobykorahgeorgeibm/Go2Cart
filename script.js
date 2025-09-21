@@ -204,7 +204,7 @@ async function fetchProducts() {
 function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'col';
-    
+    console.log("createProductCard called!");
     card.innerHTML = `
         <div class="card h-100 product-card">
             <div class="product-image-container">
@@ -228,6 +228,7 @@ function createProductCard(product) {
 
 // Render cart item
 function createCartItem(item) {
+    console.log("createCartItem called!");
     if (!item) {
         console.error("Cannot create cart item: item is undefined");
         return document.createElement('div');
@@ -281,6 +282,7 @@ function createCartItem(item) {
 
 // Render checkout item
 function createCheckoutItem(item) {
+    console.log("createCheckoutItem called!");
     if (!item) {
         console.error("Cannot create checkout item: item is undefined");
         return document.createElement('div');
