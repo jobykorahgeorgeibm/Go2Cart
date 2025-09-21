@@ -2,7 +2,7 @@
 // This script dynamically loads the app version from package.json
 
 // Initialize with a default version in case fetch fails
-let APP_VERSION = '1.0.6';
+let APP_VERSION = '1.0.7';
 
 // Function to initialize Instana with the correct version
 function initInstana() {

@@ -95,9 +95,10 @@ function level5() {
 }
 
 function level6() {
-    // Fixed: Define the data variable
+    // Fixed: Define the data variable and convert to number before using toFixed
     const data = "5.5"; // Default value
-    if (data.toFixed(2) > 10) {
+    const numData = parseFloat(data);
+    if (numData.toFixed(2) > 10) {
         console.log("More than 10");
     }
 }
