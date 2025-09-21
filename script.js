@@ -9,6 +9,10 @@ function checkAuth() {
         currentUser = JSON.parse(user);
         return true;
     }
+    // If we're not on the login page, redirect to login
+    if (!window.location.pathname.includes('index.html') && window.location.pathname !== '/') {
+        window.location.href = 'index.html';
+    }
     return false;
 }
 
@@ -26,8 +30,18 @@ function updateCartCount() {
 function loadCart() {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-        cartItems = JSON.parse(savedCart);
-        updateCartCount();
+        try {
+            cartItems = JSON.parse(savedCart);
+            console.log("Cart loaded successfully:", cartItems);
+            updateCartCount();
+        } catch (error) {
+            console.error("Error parsing cart from localStorage:", error);
+            cartItems = [];
+            localStorage.removeItem('cart');
+        }
+    } else {
+        console.log("No cart found in localStorage");
+        cartItems = [];
     }
 }
 
@@ -214,48 +228,86 @@ function createProductCard(product) {
 
 // Render cart item
 function createCartItem(item) {
-    const cartItem = document.createElement('div');
-    cartItem.className = 'card mb-3';
+    if (!item) {
+        console.error("Cannot create cart item: item is undefined");
+        return document.createElement('div');
+    }
     
-    cartItem.innerHTML = `
-        <div class="row g-0">
-            <div class="col-md-2 text-center p-2">
-                <img src="${item.image}" alt="${item.title}" class="cart-item-image">
-            </div>
-            <div class="col-md-6">
-                <div class="card-body">
-                    <h5 class="card-title">${item.title}</h5>
-                    <p class="card-text text-muted">$${item.price.toFixed(2)} each</p>
+    try {
+        const cartItem = document.createElement('div');
+        cartItem.className = 'card mb-3';
+        
+        // Ensure all required properties exist
+        const title = item.title || 'Unknown Product';
+        const image = item.image || 'https://via.placeholder.com/150';
+        const price = typeof item.price === 'number' ? item.price : 0;
+        const quantity = typeof item.quantity === 'number' ? item.quantity : 1;
+        const id = item.id || Math.random().toString(36).substr(2, 9);
+        
+        cartItem.innerHTML = `
+            <div class="row g-0">
+                <div class="col-md-2 text-center p-2">
+                    <img src="${image}" alt="${title}" class="cart-item-image">
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card-body d-flex flex-column align-items-end">
-                    <div class="input-group mb-3" style="max-width: 150px">
-                        <button class="btn btn-outline-secondary decrease-quantity" data-id="${item.id}">-</button>
-                        <input type="text" class="form-control text-center" value="${item.quantity}" readonly>
-                        <button class="btn btn-outline-secondary increase-quantity" data-id="${item.id}">+</button>
+                <div class="col-md-6">
+                    <div class="card-body">
+                        <h5 class="card-title">${title}</h5>
+                        <p class="card-text text-muted">$${price.toFixed(2)} each</p>
                     </div>
-                    <p class="card-text fw-bold">Subtotal: $${(item.price * item.quantity).toFixed(2)}</p>
-                    <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}">Remove</button>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-body d-flex flex-column align-items-end">
+                        <div class="input-group mb-3" style="max-width: 150px">
+                            <button class="btn btn-outline-secondary decrease-quantity" data-id="${id}">-</button>
+                            <input type="text" class="form-control text-center" value="${quantity}" readonly>
+                            <button class="btn btn-outline-secondary increase-quantity" data-id="${id}">+</button>
+                        </div>
+                        <p class="card-text fw-bold">Subtotal: $${(price * quantity).toFixed(2)}</p>
+                        <button class="btn btn-sm btn-danger remove-item" data-id="${id}">Remove</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
-    
-    return cartItem;
+        `;
+        
+        return cartItem;
+    } catch (error) {
+        console.error("Error creating cart item:", error, item);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger';
+        errorDiv.textContent = 'Error displaying this item';
+        return errorDiv;
+    }
 }
 
 // Render checkout item
 function createCheckoutItem(item) {
-    const checkoutItem = document.createElement('div');
-    checkoutItem.className = 'd-flex justify-content-between mb-2';
+    if (!item) {
+        console.error("Cannot create checkout item: item is undefined");
+        return document.createElement('div');
+    }
     
-    checkoutItem.innerHTML = `
-        <span>${item.title.substring(0, 20)}... × ${item.quantity}</span>
-        <span>$${(item.price * item.quantity).toFixed(2)}</span>
-    `;
-    
-    return checkoutItem;
+    try {
+        const checkoutItem = document.createElement('div');
+        checkoutItem.className = 'd-flex justify-content-between mb-2';
+        
+        // Ensure all required properties exist
+        const title = item.title || 'Unknown Product';
+        const price = typeof item.price === 'number' ? item.price : 0;
+        const quantity = typeof item.quantity === 'number' ? item.quantity : 1;
+        
+        checkoutItem.innerHTML = `
+            <span>${title.substring(0, 20)}... × ${quantity}</span>
+            <span>$${(price * quantity).toFixed(2)}</span>
+        `;
+        
+        return checkoutItem;
+    } catch (error) {
+        console.error("Error creating checkout item:", error, item);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger';
+        errorDiv.textContent = 'Error displaying this item';
+        return errorDiv;
+    }
 }
 
 // Initialize login page
@@ -292,7 +344,9 @@ async function initProductsPage() {
     const loadingElement = document.getElementById('loading');
     const errorElement = document.getElementById('error-message');
     
+    // Force authentication check
     if (!checkAuth()) {
+        console.log("User not authenticated, redirecting to login page");
         window.location.href = 'index.html';
         return;
     }
@@ -334,10 +388,14 @@ function renderCartPage() {
     const itemsTotalElement = document.getElementById('items-total');
     const cartTotalElement = document.getElementById('cart-total');
     
-    if (cartItems.length === 0) {
+    console.log("Rendering cart page with items:", cartItems);
+    
+    if (!cartItems || cartItems.length === 0) {
+        console.log("Cart is empty, showing empty cart message");
         emptyCartElement.classList.remove('d-none');
         cartContentElement.classList.add('d-none');
     } else {
+        console.log("Cart has items, displaying them");
         emptyCartElement.classList.add('d-none');
         cartContentElement.classList.remove('d-none');
         
@@ -346,8 +404,13 @@ function renderCartPage() {
         
         // Add cart items
         cartItems.forEach(item => {
-            const cartItemElement = createCartItem(item);
-            cartItemsElement.appendChild(cartItemElement);
+            console.log("Creating cart item element for:", item);
+            try {
+                const cartItemElement = createCartItem(item);
+                cartItemsElement.appendChild(cartItemElement);
+            } catch (error) {
+                console.error("Error creating cart item:", error, item);
+            }
         });
         
         // Update totals
@@ -390,11 +453,16 @@ function renderCartPage() {
 
 // Initialize cart page
 function initCartPage() {
+    // Force authentication check
     if (!checkAuth()) {
+        console.log("User not authenticated, redirecting to login page");
         window.location.href = 'index.html';
         return;
     }
     
+    // Make sure cart is loaded before rendering
+    loadCart();
+    console.log("Cart items before rendering:", cartItems);
     renderCartPage();
 }
 
@@ -409,12 +477,19 @@ function initCheckoutPage() {
     const placeOrderBtn = document.getElementById('place-order-btn');
     const continueShoppingBtn = document.getElementById('continue-shopping-btn');
     
+    // Force authentication check
     if (!checkAuth()) {
+        console.log("User not authenticated, redirecting to login page");
         window.location.href = 'index.html';
         return;
     }
     
-    if (cartItems.length === 0) {
+    // Make sure cart is loaded before checking
+    loadCart();
+    console.log("Cart items before checkout:", cartItems);
+    
+    if (!cartItems || cartItems.length === 0) {
+        console.log("Cart is empty, redirecting to cart page");
         window.location.href = 'cart.html';
         return;
     }
@@ -469,6 +544,8 @@ function initLogoutButtons() {
 
 // Initialize page based on current URL
 function initPage() {
+    console.log("Initializing application...");
+    
     // Load cart from localStorage
     loadCart();
     
@@ -477,15 +554,35 @@ function initPage() {
     
     // Determine which page we're on
     const currentPath = window.location.pathname;
+    console.log("Current path:", currentPath);
     
-    if (currentPath.endsWith('index.html') || currentPath === '/') {
+    // Check if user is authenticated
+    const isAuthenticated = checkAuth();
+    console.log("User authenticated:", isAuthenticated);
+    
+    if (currentPath.endsWith('index.html') || currentPath === '/' || currentPath === '') {
         initLoginPage();
     } else if (currentPath.endsWith('products.html')) {
-        initProductsPage();
+        if (isAuthenticated) {
+            initProductsPage();
+        } else {
+            console.log("User not authenticated, redirecting to login page");
+            window.location.href = 'index.html';
+        }
     } else if (currentPath.endsWith('cart.html')) {
-        initCartPage();
+        if (isAuthenticated) {
+            initCartPage();
+        } else {
+            console.log("User not authenticated, redirecting to login page");
+            window.location.href = 'index.html';
+        }
     } else if (currentPath.endsWith('checkout.html')) {
-        initCheckoutPage();
+        if (isAuthenticated) {
+            initCheckoutPage();
+        } else {
+            console.log("User not authenticated, redirecting to login page");
+            window.location.href = 'index.html';
+        }
     }
 }
 
