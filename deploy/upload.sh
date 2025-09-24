@@ -27,9 +27,8 @@ if [[ "$IAM_TOKEN" == "null" || -z "$IAM_TOKEN" ]]; then
 fi
 
 echo "Successfully received Bearer Token"
-
-# Upload files from public folder (or build if you have one)
-UPLOAD_DIR=".."  # or "build" if using a bundler
+# Upload files from current directory
+UPLOAD_DIR="."
 
 if [ ! -d "$UPLOAD_DIR" ]; then
   echo "Directory $UPLOAD_DIR does not exist."
@@ -38,15 +37,31 @@ fi
 
 echo "Uploading files to COS..."
 
-find $UPLOAD_DIR -type f | while read -r file; do
+find "$UPLOAD_DIR" -type f \
+  ! -path "*/.git/*" | while read -r file; do
+
   # Path relative to UPLOAD_DIR
-  REL_PATH=${file#$UPLOAD_DIR/}
+  REL_PATH="${file#$UPLOAD_DIR/}"
 
   echo "Uploading $REL_PATH..."
 
+  # Determine content type based on file extension
+  case "$file" in
+    *.html)  CONTENT_TYPE="text/html" ;;
+    *.css)   CONTENT_TYPE="text/css" ;;
+    *.js)    CONTENT_TYPE="application/javascript" ;;
+    *.json)  CONTENT_TYPE="application/json" ;;
+    *.png)   CONTENT_TYPE="image/png" ;;
+    *.jpg|*.jpeg) CONTENT_TYPE="image/jpeg" ;;
+    *.svg)   CONTENT_TYPE="image/svg+xml" ;;
+    *.woff)  CONTENT_TYPE="font/woff" ;;
+    *.woff2) CONTENT_TYPE="font/woff2" ;;
+    *)       CONTENT_TYPE="application/octet-stream" ;;
+  esac
+
   curl --silent --show-error --fail --location --request PUT "${COS_BUCKET_URL}${REL_PATH}" \
     --header "Authorization: Bearer $IAM_TOKEN" \
-    --header "Content-Type: text/html" \
+    --header "Content-Type: $CONTENT_TYPE" \
     --data-binary @"$file"
 
 done
