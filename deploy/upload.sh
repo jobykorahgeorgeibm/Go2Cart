@@ -29,7 +29,7 @@ fi
 echo "Successfully received Bearer Token"
 
 # Upload files from public folder (or build if you have one)
-UPLOAD_DIR="."  # or "build" if using a bundler
+UPLOAD_DIR=".."  # or "build" if using a bundler
 
 if [ ! -d "$UPLOAD_DIR" ]; then
   echo "Directory $UPLOAD_DIR does not exist."
