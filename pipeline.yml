@@ -28,5 +28,4 @@ jobs:
               - -exc
               - |
                 cd website-repo/deploy
-                chmod +x upload.sh
-                ./upload.sh
+                sh upload.sh
