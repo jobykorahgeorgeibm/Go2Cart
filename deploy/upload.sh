@@ -2,6 +2,14 @@
 
 set -e
 
+# Download jq binary for Linux 64-bit
+if ! command -v jq >/dev/null 2>&1; then
+  echo "Downloading jq binary..."
+  curl -L -o /tmp/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+  chmod +x /tmp/jq
+  export PATH="/tmp:$PATH"
+fi
+
 # Get Bearer Token
 echo "Getting Bearer Token from IBM IAM..."
 
