@@ -1,0 +1,33 @@
+resources:
+  - name: website-repo
+    type: git
+    source:
+      uri: https://github.com/jobykorahgeorgeibm/Go2Cart.git
+      branch: main
+
+jobs:
+  - name: deploy-to-ibm-cos
+    plan:
+      - get: website-repo
+        trigger: true
+      - task: upload-to-cos
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: curlimages/curl  # Comes with curl + shell
+          params:
+            IBM_API_KEY: ((ibm_api_key))
+            COS_BUCKET_URL: ((cos_bucket_url))
+          inputs:
+            - name: website-repo
+          run:
+            path: sh
+            args:
+              - -exc
+              - |
+                apk add --no-cache jq  # Install jq
+                cd website-repo/deploy
+                chmod +x upload.sh
+                ./upload.sh
