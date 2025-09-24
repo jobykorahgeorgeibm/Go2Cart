@@ -572,7 +572,7 @@ function initPage() {
     if (currentPath.endsWith('index.html') || currentPath === '/' || currentPath === '') {
         initLoginPage();
         console.log("Initializing login page");
-    } else if (currentPath.endsWith('products')) {
+    } else if (currentPath.endsWith('products.html')) {
         console.log("Initializing products page");
         if (isAuthenticated) {
             initProductsPage();
@@ -580,7 +580,7 @@ function initPage() {
             console.log("User not authenticated, redirecting to login page");
             window.location.href = 'index.html';
         }
-    } else if (currentPath.endsWith('cart')) {
+    } else if (currentPath.endsWith('cart.html')) {
         console.log("Initializing cart page");
         if (isAuthenticated) {
             initCartPage();
@@ -588,7 +588,7 @@ function initPage() {
             console.log("User not authenticated, redirecting to login page");
             window.location.href = 'index.html';
         }
-    } else if (currentPath.endsWith('checkout')) {
+    } else if (currentPath.endsWith('checkout.html')) {
         console.log("Initializing checkout page");
         if (isAuthenticated) {
             initCheckoutPage();
