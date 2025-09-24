@@ -28,7 +28,7 @@ fi
 
 echo "Successfully received Bearer Token"
 # Upload files from current directory
-UPLOAD_DIR="."
+UPLOAD_DIR=".."
 
 if [ ! -d "$UPLOAD_DIR" ]; then
   echo "Directory $UPLOAD_DIR does not exist."
