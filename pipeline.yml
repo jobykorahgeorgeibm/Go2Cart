@@ -27,7 +27,6 @@ jobs:
             args:
               - -exc
               - |
-                apk add --no-cache jq  # Install jq
                 cd website-repo/deploy
                 chmod +x upload.sh
                 ./upload.sh
